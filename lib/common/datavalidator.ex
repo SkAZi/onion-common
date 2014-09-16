@@ -188,12 +188,16 @@ defmodule Onion.Common.DataValidator do
         end
     end
 
-    def validate(dict, mandatory, optional \\ []) do
+    def validate(dict, mandatory, optional \\ [], strict \\ false) do
         Logger.debug "Validate #{inspect dict} #{inspect mandatory} #{inspect optional}"
         case process_mandatory(key_to_bin(mandatory), dict, %{}) do
             {:ok, new_dict} -> 
                 case process_optional(key_to_bin(optional), dict, new_dict) do
-                    {:ok, new_dict2} -> {:ok, process_other(dict |> Enum.into([]), new_dict2)}
+                    {:ok, new_dict2} -> 
+                        case strict || false do
+                            false -> {:ok, process_other(dict |> Enum.into([]), new_dict2)}
+                            true -> {:ok, new_dict2}
+                        end
                     :error -> {:error, dict}
                 end
             :error -> {:error, dict}

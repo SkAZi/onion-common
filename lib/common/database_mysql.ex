@@ -1,4 +1,4 @@
-defmodule Onion.Common.Database.MySQL do
+defmodule Onion.RPC.Database.MySQL do
     defmacro __using__(_options) do
         quote do
             defp escape([]), do: []
@@ -49,32 +49,45 @@ defmodule Onion.Common.Database.MySQL do
             def insert(obj) when is_list(obj), do: insert(obj |> Enum.into %{})
             def insert(obj) when is_map(obj) do
                 {keys, values} = get_key_vals(obj)
-                query("INSERT INTO #{@table_name} (#{keys |> Enum.join(",")})
-                    VALUES (#{insert_placeholder(keys)});", values)
+                query("INSERT INTO #{@table_name} (#{keys |> Enum.join(",")}) VALUES (#{insert_placeholder(keys)});", values)
             end
 
             def update(up) when is_list(up), do: update(up |> Enum.into %{})
             def update(up) when is_map(up) do
-                update(slice_pks(up), up)
+                case all_pk?(up) do
+                    true -> 
+                        {pk, npk} = divide_pks(up)
+                        case Dict.size(npk) do
+                            0 -> nil
+                            _ -> update(pk, npk)
+                        end
+                    false -> nil
+                end
             end
             def update(obj, up) when is_map(obj) do
                 {keys, values} = get_key_vals(up)
                 values = values ++ select_pks(obj)
 
-                query("UPDATE INTO #{@table_name} SET #{update_placeholder(keys)}
-                    WHERE #{Enum.join(pk_placeholder(), " AND ")}", values)
+                query("UPDATE INTO #{@table_name} SET #{update_placeholder(keys)} WHERE #{Enum.join(pk_placeholder(), " AND ")}", values)
             end
 
-            def get(values) when is_list(values) do
-                query("SELECT #{Enum.join(@field_names, ",")} FROM #{@table_name}
-                    WHERE #{Enum.join(pk_placeholder(), " AND ")} LIMIT 1", values)
+            def get(values) when is_list(values), do: get(values |> atomise)
+            def get(values) when is_map(values) do
+                case all_pk?(values) do
+                    true -> query("SELECT #{Enum.join(@field_names, ",")} FROM #{@table_name} WHERE #{Enum.join(pk_placeholder(), " AND ")}", select_pks(values))
+                    false -> nil
+                end
             end
             def get(values), do: get([values])
 
-            def select(filters) do
+            def select(filters, limit \\ nil) do
                 {keys, values, _opts} = get_filters(filters)
-                q = query("SELECT #{Enum.join(@field_names, ",")} FROM #{@table_name}
-                    WHERE #{Enum.join(keys, " AND ")}", values)
+                q = "SELECT #{Enum.join(@field_names, ",")} FROM #{@table_name}"
+
+                q = case length(keys) do
+                    0 -> q
+                    _ -> query("#{q} WHERE #{Enum.join(keys, " AND ")}", values)
+                end
 
                 q = case filters[:order_by] do
                     nil -> q
@@ -82,7 +95,7 @@ defmodule Onion.Common.Database.MySQL do
                     order -> "#{q} ORDER BY #{Enum.join(order, ", ")}"
                 end
 
-                case {filters[:limit], filters[:offset]} do
+                case {filters[:limit] || limit, filters[:offset]} do
                     {nil, nil} -> q
                     {limit, nil} -> "#{q} LIMIT #{limit}"
                     {nil, offset} -> "#{q} OFFSET #{offset}"
@@ -90,20 +103,14 @@ defmodule Onion.Common.Database.MySQL do
                 end
             end
 
-            def delete(obj) when is_list(obj), do: delete(obj |> Enum.into %{})
+            def delete(obj) when is_list(obj), do: delete(obj |> atomise)
             def delete(obj) when is_map(obj) do
-                case obj[:__struct__] == __MODULE__ do
-                    true ->
-                        cond do
-                            %{__dirty__: true} = obj -> nil
-                            all_pk?(obj) -> nil
-                            true -> query("DELETE FROM #{@table_name}
-                                WHERE #{Enum.join(pk_placeholder(), " AND ")}", select_pks(obj))
-                        end
-                    false ->
-                        {keys, values, _opts} = get_filters(obj)
-                        query("DELETE FROM #{@table_name}
-                            WHERE #{Enum.join(keys, " AND ")}", values)
+                IO.inspect({obj, all_pk?(obj)})
+                cond do
+                    obj[:__dirty__] == true -> nil
+                    all_pk?(obj) -> query("DELETE FROM #{@table_name}
+                        WHERE #{Enum.join(pk_placeholder(), " AND ")}", select_pks(obj))
+                    true -> nil
                 end
             end
 

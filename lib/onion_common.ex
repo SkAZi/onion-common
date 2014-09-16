@@ -54,11 +54,11 @@ defmodule Onion.Common do
             :cow_qs.parse_qs(body) |> key_to_bin_dict
         end
 
-        def process(:in, state = %{ request: %{body: body, method: "POST", headers: %{"content-type" => "application/json"}} }, _opts) do
+        def process(:in, state = %{ request: %{body: body, headers: %{"content-type" => "application/json"}} }, _opts) do
             put_in state, [:request, :post], process_json(body)
         end
 
-        def process(:in, state = %{ request: %{body: body, method: "POST", headers: %{"content-type" => "application/x-www-form-urlencoded"}} }, _opts) do
+        def process(:in, state = %{ request: %{body: body, headers: %{"content-type" => "application/x-www-form-urlencoded"}} }, _opts) do
             put_in state, [:request, :post], process_urlencoded(body)
         end
 
@@ -103,7 +103,7 @@ defmodule Onion.Common do
                     |> Dict.merge(request[:qs_vals])
                     |> Dict.merge(request[:post])
 
-            case Onion.Common.DataValidator.validate(args, opts[:args] || [], opts[:optional] || []) do
+            case Onion.Common.DataValidator.validate(args, opts[:args] || [], opts[:optional] || [], opts[:strict]) do
                 {:ok, args} -> 
                     put_in(state, [:request, :args], args)
 

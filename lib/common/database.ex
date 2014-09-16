@@ -1,4 +1,4 @@
-defmodule Onion.Common.Database do
+defmodule Onion.RPC.Database do
     defmacro __using__(_options) do
         quote do
 
@@ -11,7 +11,7 @@ defmodule Onion.Common.Database do
                             |> String.split(".", parts: 2)
                             |> List.last
                             |> String.replace(".", "")
-                            |> AfJsonREST.Utils.camel_to_snake()
+                            |> Onion.RPS.Utils.camel_to_snake()
 
                         @table_type   Dict.get unquote(args), :type, :mysql
                         @primary_keys Dict.get unquote(args), :pk, [:id]
@@ -24,9 +24,9 @@ defmodule Onion.Common.Database do
 
                         @fields fields
                         @field_names field_names
-                        use Onion.Common.Database.Base
+                        use Onion.RPC.Database.Base
                         case @table_type do
-                            :mysql -> use Onion.Common.Database.MySQL
+                            :mysql -> use Onion.RPC.Database.MySQL
                             _ -> raise "Undefined Database Type"
                         end
 
@@ -36,8 +36,8 @@ defmodule Onion.Common.Database do
                 end
             end # aftable
 
-            defmacro deffield name, args \\ [] do
-                quote location: :keep do
+            defmacro deffield name, args do
+                quote do
                     fields = [ { unquote(name), unquote(args) } | fields]
                     field_names = [unquote(name) | field_names]
 

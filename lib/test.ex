@@ -1,4 +1,17 @@
 import Onion
+import Onion.RPC
+
+deftable TestModel, pk: [:id] do
+    deffield :id,    type: :int, autoincrement: true, null: false
+    deffield :name,  type: :string,  null: false, default: "undefined"
+    deffield :type,  type: :int, null: false, default: 1
+end
+
+deftable TestModel2, pk: [:id, :name] do
+    deffield :id,    type: :int, autoincrement: true, null: false
+    deffield :name,  type: :string,  null: false, default: "undefined"
+    deffield :type,  type: :int, null: false, default: 1
+end
 
 defmiddleware Out do
     def process(:in, state, opts) do
@@ -6,19 +19,27 @@ defmiddleware Out do
     end
 end
 
+
+
 defhandler Route2, middlewares: [
         Onion.Common.BaseHttpData, 
         Onion.Common.HttpPostData, 
-        Onion.Common.DumbFlashResponse,
-        Onion.Common.ValidateArgs.init(args: [a: :integer, b: :string]),
+        #Onion.Common.DumbFlashResponse,
     ] do
     
-    route "/", middlewares: [Out]
-    route "/:a", middlewares: [Out]
+    route "/table/[:id]", middlewares: [
+        Onion.Common.ValidateArgs.init(optional: TestModel.fields, strict: true), 
+        Onion.RPC.Resource.init(model: TestModel)
+    ]
+
+    route "/table2/[:id/:name]", middlewares: [
+        Onion.Common.ValidateArgs.init(optional: TestModel2.fields, strict: true), 
+        Onion.RPC.Resource.init(model: TestModel2)
+    ]
 end
 
 
-defserver Server2, listener_name: :server2, port: 8081 do
+defserver Server2, port: 8081 do
     handler Route2
 end
 
