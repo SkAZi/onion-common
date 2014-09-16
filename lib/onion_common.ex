@@ -41,7 +41,7 @@ defmodule Onion.Common do
     end
 
 
-    defmiddleware HttpPostData, require: [BaseHttpData] do
+    defmiddleware HttpPostData, required: [BaseHttpData] do
 
         defp process_json(body) do
             case :jiffy.decode(body, [:return_maps]) do
@@ -96,7 +96,7 @@ defmodule Onion.Common do
     end
 
 
-    defmiddleware ValidateArgs, require: [BaseHttpData, HttpPostData] do
+    defmiddleware ValidateArgs, required: [BaseHttpData, HttpPostData] do
 
         def process(:in, state = %{ request: request }, opts) do
             args = request[:bindings]
@@ -117,7 +117,7 @@ defmodule Onion.Common do
     end
 
 
-    defmiddleware DumbFlashResponse, require: [ValidateArgs] do
+    defmiddleware DumbFlashResponse, required: [ValidateArgs] do
         def process(:out, state = %{request: %{ args: args }, response: response}, _opts) do
             res = Enum.filter(args, fn({"__" <> _, _})-> true; (_)-> false end) |> Enum.into(%{})
 
