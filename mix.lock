@@ -2,7 +2,7 @@
   "cowlib": {:git, "git://github.com/ninenines/cowlib.git", "d544a494af4dbc810fc9c15eaf5cc050cced1501", [ref: "1.0.0"]},
   "hexagon": {:git, "git://github.com/veryevilzed/hex.git", "d1afa9c9f37f85d32e6d2d8bf327fc8a15a12f42", []},
   "jiffy": {:git, "git://github.com/davisp/jiffy.git", "5cd89c1eda3801bdef790b1e7c0e09259332c0fc", []},
-  "onion": {:git, "git://github.com/veryevilzed/onion.git", "9f2e2c870ee348c6376631943e73cd37ac64662e", []},
+  "onion": {:git, "git://github.com/veryevilzed/onion.git", "973c6c7a0dd5a51e0b8076bf59ac54a3f6c5e404", []},
   "quickrand": {:git, "https://github.com/okeuday/quickrand.git", "0395a10b94472ccbe38b62bbfa9d0fc1ddac1dd7", [tag: "v1.3.2"]},
   "ranch": {:git, "git://github.com/ninenines/ranch.git", "adf1822defc2b7cfdc7aca112adabfa1d614043c", [ref: "1.0.0"]},
   "underscorex": {:git, "git@git.appforge.ru:elixir/underscorex.git", "c46ff49f329ad4861d5a80029df287f347333796", []},
