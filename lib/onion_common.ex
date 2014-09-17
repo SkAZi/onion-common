@@ -62,6 +62,15 @@ defmodule Onion.Common do
             put_in state, [:request, :post], process_urlencoded(body)
         end
 
+        def process(:in, state = %{ request: %{body: body, headers: %{"Content-Type" => "application/json"}} }, _opts) do
+            put_in state, [:request, :post], process_json(body)
+        end
+
+        def process(:in, state = %{ request: %{body: body, headers: %{"Content-Type" => "application/x-www-form-urlencoded"}} }, _opts) do
+            put_in state, [:request, :post], process_urlencoded(body)
+        end
+
+
         def process(:in, state, _opts) do
             put_in state, [:request, :post], %{}
         end
