@@ -1,7 +1,7 @@
 %{"cowboy": {:git, "git://github.com/extend/cowboy.git", "b57f94661f5fd186f55eb0fead49849e0b1399d1", []},
   "cowlib": {:git, "git://github.com/ninenines/cowlib.git", "d544a494af4dbc810fc9c15eaf5cc050cced1501", [ref: "1.0.0"]},
   "hexagon": {:git, "git://github.com/veryevilzed/hex.git", "d1afa9c9f37f85d32e6d2d8bf327fc8a15a12f42", []},
-  "jiffy": {:git, "git://github.com/davisp/jiffy.git", "5cd89c1eda3801bdef790b1e7c0e09259332c0fc", []},
+  "jiffy": {:git, "git://github.com/SkAZi/jiffy.git", "0bb3a1ba01728e2f45f6cdb18539b69169b11e0c", []},
   "onion": {:git, "git://github.com/veryevilzed/onion.git", "b6176b935ce4aaf59abe8f71f9646ac11f1a5e51", []},
   "quickrand": {:git, "https://github.com/okeuday/quickrand.git", "0395a10b94472ccbe38b62bbfa9d0fc1ddac1dd7", [tag: "v1.3.2"]},
   "ranch": {:git, "git://github.com/ninenines/ranch.git", "adf1822defc2b7cfdc7aca112adabfa1d614043c", [ref: "1.0.0"]},
