@@ -130,12 +130,13 @@ defmodule Onion.Common do
     end
 
 
-    defmiddleware Session do
+    defmiddleware Session, required: [] do
 
-        defp create_session(state=%{response: response}) do
+        defp create_session(state) do
             session = U.uuid
-            state |> put_in [:request, :session], session
-            set_coockie("session", session)
+            state 
+                |> put_in([:request, :session], session) 
+                |> set_coockie("session", session)
         end
 
         def process(:in, state = %{cowboy: req}, _) do
