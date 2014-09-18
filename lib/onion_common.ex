@@ -150,4 +150,42 @@ defmodule Onion.Common do
     end
     
 
+    defmiddleware Wtf, required: [] do
+
+        def process(:in, state, opts) do
+            case Mix.env do
+                :prod -> state
+                _ -> 
+                    probability = (opts[:probability] || 10) / 100
+                    errors = opts[:errors] || [
+                        {200, 42},
+                        {200, "Ha-ha gocha!"},
+                        {401, "Session broken"},
+                        {402, "Something went wrong"},
+                        {403, "Not allowed"},
+                        {404, "Not found"},
+                        {500, "Server error"},
+                        {502, "Server busy"},
+                        {502, "Server absolutely busy"},
+                    ]
+
+                    <<a :: 32, b :: 32, c :: 32 >> = :crypto.rand_bytes(12)
+                    :random.seed(a, b, c)
+
+                    cond do
+                        :random.uniform() < probability -> 
+                            {num, res} = Enum.at(errors, :random.uniform(length(errors))-1)
+                            reply(state, num, res) |> break
+                        :random.uniform() < probability * 3 ->
+                            :timer.sleep 4000                    
+                            state
+                        :random.uniform() < probability * 1 ->
+                            :timer.sleep 10000
+                            state
+                        true -> state
+                    end
+            end
+        end
+    end
+
 end
