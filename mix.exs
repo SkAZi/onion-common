@@ -16,7 +16,7 @@ defmodule OnionCommon.Mixfile do
     [
       {:onion, github: "veryevilzed/onion"},
       {:jiffy , github: "davisp/jiffy"},
-      {:underscorex, git: "git@git.appforge.ru:elixir/underscorex.git"}
+      {:underscorex, github: "veryevilzed/underscorex"}
     ]
   end
 end
