@@ -67,10 +67,9 @@ defmodule Onion.Common do
         end
 
 
-        def process(:out, state = %{ request: %{qs_vals: qs, headers: %{"accept" => accept}}, response: response }, _opts) do
+        def process(:out, state = %{ request: %{qs_vals: qs, headers: %{"accept" => accept}}, response: response}, _opts) do
             is_json = qs["type"] == "json" or accept == "*/*" or String.contains?(accept, "application/json")
             is_text = true
-
             cond do
                 is_json -> 
                     res = :jiffy.encode(response[:body])
@@ -129,5 +128,25 @@ defmodule Onion.Common do
             end
         end
     end
+
+
+    defmiddleware Session do
+
+        defp create_session(state=%{response: response}) do
+            session = U.uuid
+            state |> put_in [:request, :session], session
+            set_coockie("session", session)
+        end
+
+        def process(:in, state = %{cowboy: req}, _) do
+            case :cowboy_req.cookie("session", req) do
+                    {:undefined, _} -> create_session(state)
+                    {"", _} -> create_session(state)
+                    {session, _} -> state |> put_in [:request, :session], session
+            end
+        end
+
+    end
+    
 
 end
