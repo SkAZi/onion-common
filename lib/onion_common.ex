@@ -44,7 +44,7 @@ defmodule Onion.Common do
     defmiddleware HttpPostData, required: [BaseHttpData] do
 
         defp process_json(body) do
-            case :jiffy.decode(body, [:return_maps]) do
+            case :jiffy.decode(body, [:return_maps, :use_nil]) do
                 {:error, _} -> %{} 
                 res -> res |> key_to_bin_dict
             end
@@ -68,13 +68,13 @@ defmodule Onion.Common do
 
 
         def process(:out, state = %{ request: %{qs_vals: qs, headers: %{"accept" => accept}}, response: response}, _opts) do
-            is_json = qs["type"] == "json" or accept == "*/*" or String.contains?(accept, "application/json")
+            is_json = qs["_type"] == "json" or accept == "*/*" or String.contains?(accept, "application/json")
             is_text = true
             cond do
                 is_json -> 
-                    res = :jiffy.encode(response[:body])
+                    res = :jiffy.encode(response[:body], [:use_nil])
 
-                    res = case qs["callback"] do
+                    res = case qs["_callback"] do
                         nil -> res
                         name -> "#{name}(#{res})"
                     end
