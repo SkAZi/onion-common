@@ -54,11 +54,11 @@ defmodule Onion.Common do
             :cow_qs.parse_qs(body) |> key_to_bin_dict
         end
 
-        def process(:in, state = %{ request: %{body: body, headers: %{"content-type" => "application/json"}} }, _opts) do
+        def process(:in, state = %{ request: %{body: body, headers: %{"content-type" => "application/json" <> _}} }, _opts) do
             put_in state, [:request, :post], process_json(body)
         end
 
-        def process(:in, state = %{ request: %{body: body, headers: %{"content-type" => "application/x-www-form-urlencoded"}} }, _opts) do
+        def process(:in, state = %{ request: %{body: body, headers: %{"content-type" => "application/x-www-form-urlencoded" <> _}} }, _opts) do
             put_in state, [:request, :post], process_urlencoded(body)
         end
 
