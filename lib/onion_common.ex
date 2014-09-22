@@ -11,7 +11,7 @@ defmodule Onion.Common do
     end
 
 
-    defmiddleware BaseHttpData do
+    defmiddleware BaseHttpData, chain_type: :only do
 
         @default [:headers, :method, :host, :port, :path, :qs_vals, :bindings]
 
@@ -41,7 +41,7 @@ defmodule Onion.Common do
     end
 
 
-    defmiddleware HttpPostData, required: [BaseHttpData] do
+    defmiddleware HttpPostData, chain_type: :only, required: [BaseHttpData] do
 
         defp process_json(body) do
             case :jiffy.decode(body, [:return_maps, :use_nil]) do
@@ -95,10 +95,11 @@ defmodule Onion.Common do
     end
 
 
-    defmiddleware ValidateArgs, required: [BaseHttpData, HttpPostData] do
+    defmiddleware ValidateArgs, chain_type: :args_only, required: [BaseHttpData, HttpPostData] do
 
         def process(:in, state = %{ request: request }, opts) do
-            args = request[:bindings]
+            args = (request[:args] || %{})
+                    |> Dict.merge(request[:bindings])
                     |> Dict.merge(request[:qs_vals])
                     |> Dict.merge(request[:post])
 
@@ -116,7 +117,7 @@ defmodule Onion.Common do
     end
 
 
-    defmiddleware DumbFlashResponse, required: [ValidateArgs] do
+    defmiddleware DumbFlashResponse, chain_type: :only, required: [ValidateArgs] do
         def process(:out, state = %{request: %{ args: args }, response: response}, _opts) do
             res = Enum.filter(args, fn({"__" <> _, _})-> true; (_)-> false end) |> Enum.into(%{})
 
@@ -130,7 +131,7 @@ defmodule Onion.Common do
     end
 
 
-    defmiddleware Session, required: [] do
+    defmiddleware Session, chain_type: :only, required: [] do
 
         defp create_session(state) do
             session = U.uuid
@@ -150,7 +151,7 @@ defmodule Onion.Common do
     end
     
 
-    defmiddleware Wtf, required: [] do
+    defmiddleware Wtf, chain_type: :only, required: [] do
 
         def process(:in, state, opts) do
             case Mix.env do
