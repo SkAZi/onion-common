@@ -68,9 +68,24 @@ defmodule Onion.Common do
 
 
         def process(:out, state = %{ request: %{qs_vals: qs, headers: %{"accept" => accept}}, response: response}, _opts) do
-            is_json = qs["_type"] == "json" or accept == "*/*" or String.contains?(accept, "application/json")
-            is_text = true
+            is_text = String.contains?(accept, "plain/text")
+            is_html = String.contains?(accept, "text/html")
+            is_json = true
             cond do
+                is_text or is_html -> 
+                    res = case response[:body] do
+                        nil -> ""
+                        val when is_binary(val) -> val
+                        val -> inspect(val)
+                    end
+
+                    headers = cond do
+                        is_text -> [{"content-type", "plain/text; charset=UTF-8"}]
+                        is_html -> [{"content-type", "plain/html; charset=UTF-8"}]
+                    end
+
+                    reply(state, 200, res, headers)
+
                 is_json -> 
                     res = :jiffy.encode(response[:body], [:use_nil])
 
@@ -80,15 +95,6 @@ defmodule Onion.Common do
                     end
 
                     reply(state, 200, res, [{"content-type", "application/json; charset=UTF-8"}])
-
-                is_text -> 
-                    res = case response[:body] do
-                        nil -> ""
-                        val when is_binary(val) -> val
-                        val -> inspect(val)
-                    end
-
-                    reply(state, 200, res)
             end
         end
 
