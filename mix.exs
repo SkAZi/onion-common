@@ -14,7 +14,7 @@ defmodule OnionCommon.Mixfile do
 
   defp deps do
     [
-      {:onion, github: "veryevilzed/onion", branch: "1.0.x"},
+      {:onion, github: "veryevilzed/onion"},
       {:jiffy , github: "SkAZi/jiffy"},
       {:underscorex, github: "veryevilzed/underscorex"}
     ]
