@@ -43,6 +43,8 @@ defmodule Onion.Common do
 
     defmiddleware HttpPostData, chain_type: :only, required: [BaseHttpData] do
 
+        defp process_json(""), do: nil
+        defp process_json(nil), do: ""
         defp process_json(body) do
             case :jiffy.decode(body, [:return_maps, :use_nil]) do
                 {:error, _} -> %{} 
