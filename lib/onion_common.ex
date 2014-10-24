@@ -73,9 +73,9 @@ defmodule Onion.Common do
         end
 
 
-        def process(:out, state = %{ request: %{qs_vals: qs, headers: %{"accept" => accept}}, response: response}, _opts) do
-            is_text = String.contains?(accept, "plain/text")
-            is_html = String.contains?(accept, "text/html")
+        def process(:out, state = %{ request: %{qs_vals: qs, headers: headers}, response: response}, _opts) do
+            is_text = String.contains?(headers[:accept] || "", "plain/text")
+            is_html = String.contains?(headers[:accept] || "", "text/html")
             is_json = true
             cond do
                 is_text or is_html -> 
