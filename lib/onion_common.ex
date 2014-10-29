@@ -11,7 +11,7 @@ defmodule Onion.Common do
     end
 
 
-    defmiddleware BaseHttpData do
+    defmiddleware BaseHttpData, chain_type: :only do
 
         @default [:headers, :method, :host, :port, :path, :qs_vals, :bindings]
 
@@ -41,10 +41,12 @@ defmodule Onion.Common do
     end
 
 
-    defmiddleware HttpPostData, required: [BaseHttpData] do
+    defmiddleware HttpPostData, chain_type: :only, required: [BaseHttpData] do
 
+        defp process_json(""), do: %{}
+        defp process_json(nil), do: %{}
         defp process_json(body) do
-            case :jiffy.decode(body, [:return_maps]) do
+            case :jiffy.decode(body, [:return_maps, :use_nil]) do
                 {:error, _} -> %{} 
                 res -> res |> key_to_bin_dict
             end
@@ -54,11 +56,15 @@ defmodule Onion.Common do
             :cow_qs.parse_qs(body) |> key_to_bin_dict
         end
 
-        def process(:in, state = %{ request: %{body: body, headers: %{"content-type" => "application/json"}} }, _opts) do
+        def process(:in, state = %{ request: %{body: body, headers: %{"content-type" => "application/json" <> _}} }, _opts) do
             put_in state, [:request, :post], process_json(body)
         end
 
-        def process(:in, state = %{ request: %{body: body, headers: %{"content-type" => "application/x-www-form-urlencoded"}} }, _opts) do
+        def process(:in, state = %{ request: %{body: body} }, [forcejson: true]) do
+            put_in state, [:request, :post], process_json(body)
+        end
+
+        def process(:in, state = %{ request: %{body: body, headers: %{"content-type" => "application/x-www-form-urlencoded" <> _}} }, _opts) do
             put_in state, [:request, :post], process_urlencoded(body)
         end
 
@@ -67,38 +73,45 @@ defmodule Onion.Common do
         end
 
 
-        def process(:out, state = %{ request: %{qs_vals: qs, headers: %{"accept" => accept}}, response: response}, _opts) do
-            is_json = qs["type"] == "json" or accept == "*/*" or String.contains?(accept, "application/json")
-            is_text = true
+        def process(:out, state = %{ request: %{qs_vals: qs, headers: headers}, response: response}, _opts) do
+            is_text = String.contains?(headers[:accept] || "", "plain/text")
+            is_html = String.contains?(headers[:accept] || "", "text/html")
+            is_json = true
             cond do
-                is_json -> 
-                    res = :jiffy.encode(response[:body])
-
-                    res = case qs["callback"] do
-                        nil -> res
-                        name -> "#{name}(#{res})"
-                    end
-
-                    reply(state, 200, res, [{"content-type", "application/json; charset=UTF-8"}])
-
-                is_text -> 
+                is_text or is_html -> 
                     res = case response[:body] do
                         nil -> ""
                         val when is_binary(val) -> val
                         val -> inspect(val)
                     end
 
-                    reply(state, 200, res)
+                    headers = cond do
+                        is_text -> [{"content-type", "plain/text; charset=UTF-8"}]
+                        is_html -> [{"content-type", "plain/html; charset=UTF-8"}]
+                    end
+
+                    reply(state, 200, res, headers)
+
+                is_json -> 
+                    res = :jiffy.encode(response[:body], [:use_nil])
+
+                    res = case qs["_callback"] do
+                        nil -> res
+                        name -> "#{name}(#{res})"
+                    end
+
+                    reply(state, 200, res, [{"content-type", "application/json; charset=UTF-8"}])
             end
         end
 
     end
 
 
-    defmiddleware ValidateArgs, required: [BaseHttpData, HttpPostData] do
+    defmiddleware ValidateArgs, chain_type: :args_only, required: [BaseHttpData, HttpPostData] do
 
         def process(:in, state = %{ request: request }, opts) do
-            args = request[:bindings]
+            args = (request[:args] || %{})
+                    |> Dict.merge(request[:bindings])
                     |> Dict.merge(request[:qs_vals])
                     |> Dict.merge(request[:post])
 
@@ -116,7 +129,7 @@ defmodule Onion.Common do
     end
 
 
-    defmiddleware DumbFlashResponse, required: [ValidateArgs] do
+    defmiddleware DumbFlashResponse, chain_type: :only, required: [ValidateArgs] do
         def process(:out, state = %{request: %{ args: args }, response: response}, _opts) do
             res = Enum.filter(args, fn({"__" <> _, _})-> true; (_)-> false end) |> Enum.into(%{})
 
@@ -130,7 +143,7 @@ defmodule Onion.Common do
     end
 
 
-    defmiddleware Session, required: [] do
+    defmiddleware Session, chain_type: :only, required: [] do
 
         defp create_session(state) do
             session = U.uuid
@@ -150,7 +163,7 @@ defmodule Onion.Common do
     end
     
 
-    defmiddleware Wtf, required: [] do
+    defmiddleware Wtf, chain_type: :only, required: [] do
 
         def process(:in, state, opts) do
             case Mix.env do

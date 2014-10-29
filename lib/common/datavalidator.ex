@@ -120,6 +120,7 @@ defmodule Onion.Common.DataValidator do
     defp process(value, :bool), do: to_bool(value)
     defp process(value, :boolean), do: to_bool(value)
     defp process(value, :float), do: to_float(value)
+    defp process(value, :timestamp), do: to_integer(value)
     defp process(value, :integer), do: to_integer(value)
     defp process(value, :int), do: to_integer(value)
     defp process(value, :binary), do: to_binary(value)
@@ -128,8 +129,9 @@ defmodule Onion.Common.DataValidator do
     defp process(value, :str), do: to_binary(value)
     defp process(value, :list), do: to_list(value)
 
-    defp process(value, :int_list), do: to_list(value) |> to_int_list
+    defp process(value, :timestamp_list), do: to_list(value) |> to_int_list
     defp process(value, :integer_list), do: to_list(value) |> to_int_list
+    defp process(value, :int_list), do: to_list(value) |> to_int_list
     defp process(value, :float_list), do: to_list(value) |> to_float_list
     defp process(value, :bin_list), do: to_list(value) |> to_bin_list
     defp process(value, :str_list), do: to_list(value) |> to_bin_list
