@@ -1,7 +1,5 @@
 defmodule Onion.Common.DataValidator do
 
-    require Logger
-
     defp to_atom(value) when is_atom(value), do: {:ok, value }
     defp to_atom(value) when is_binary(value), do: {:ok, String.to_atom(value) }
     defp to_atom(value), do: {:error, value}
@@ -189,7 +187,6 @@ defmodule Onion.Common.DataValidator do
     end
 
     def validate(dict, mandatory, optional \\ [], strict \\ false) do
-        Logger.debug "Validate #{inspect dict} #{inspect mandatory} #{inspect optional}"
         case process_mandatory(key_to_bin(mandatory), dict, %{}) do
             {:ok, new_dict} -> 
                 case process_optional(key_to_bin(optional), dict, new_dict) do
