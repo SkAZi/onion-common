@@ -4,6 +4,11 @@ defmodule Onion.Common.DataValidator do
     defp to_atom(value) when is_binary(value), do: {:ok, String.to_atom(value) }
     defp to_atom(value), do: {:error, value}
 
+    defp to_existing_atom(value) when is_atom(value), do: {:ok, value }
+    defp to_existing_atom(value) when is_binary(value), do: {:ok, String.to_existing_atom(value) }
+    defp to_existing_atom(value), do: {:error, value}
+
+
     defp to_binary(value) when is_atom(value), do: {:ok, Atom.to_string(value) }
     defp to_binary(value) when is_binary(value), do: {:ok, value }
     defp to_binary(value) when is_integer(value), do: {:ok, Integer.to_string(value) }
@@ -99,6 +104,22 @@ defmodule Onion.Common.DataValidator do
         end
     end
 
+    defp to_existing_atom_list(a={:error, _}), do: a
+    defp to_existing_atom_list({:ok, val}), do: to_existing_atom_list(val)
+    defp to_existing_atom_list(value) when is_list(value) do 
+        case (value |> Enum.reduce {:ok, []}, 
+            fn(item, {:ok, array}) -> 
+                case to_existing_atom(item) do
+                    {:ok, new_item} -> {:ok, [new_item|array]}
+                    {:error, _} -> :error
+                end;
+            (_, :error) -> :error
+            end) do
+            :error -> {:error, value}
+            {:ok, val} -> {:ok, Enum.reverse(val) }
+        end
+    end
+
     defp to_float_list(a={:error, _}), do: a
     defp to_float_list({:ok, val}), do: to_float_list(val)
     defp to_float_list(value) when is_list(value) do 
@@ -116,6 +137,8 @@ defmodule Onion.Common.DataValidator do
     end
 
     defp process(value, :atom), do: to_atom(value)
+    defp process(value, :exatom), do: to_existing_atom(value)
+    defp process(value, :existing_atom), do: to_existing_atom(value)
     defp process(value, :map), do: to_map(value)
     defp process(value, :bool), do: to_bool(value)
     defp process(value, :boolean), do: to_bool(value)
@@ -138,6 +161,8 @@ defmodule Onion.Common.DataValidator do
     defp process(value, :string_list), do: to_list(value) |> to_bin_list
     defp process(value, :binary_list), do: to_list(value) |> to_bin_list
     defp process(value, :atom_list), do: to_list(value) |> to_atom_list
+    defp process(value, :exatom_list), do: to_list(value) |> to_existing_atom_list
+    defp process(value, :existing_atom_list), do: to_list(value) |> to_existing_atom_list
     defp process(value, :any_list), do: to_list(value)
     defp process(value, :any), do: to_any(value)
 
