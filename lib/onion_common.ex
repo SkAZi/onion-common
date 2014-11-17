@@ -142,28 +142,26 @@ defmodule Onion.Common do
         end
     end
 
-    defmiddleware Response, chain_type: :only, required: [ValidateArgs] do
+    defmiddleware Response, chain_type: :only do
         
         def process(:out, state = %{request: %{ args: args }, response: response}, :hide_status_code) do
-            res = Enum.filter(args, fn({"__" <> _, _})-> true; (_)-> false end) |> Enum.into(%{})
 
             case response[:code] < 300 do
                 true -> 
-                    reply(state, 200, Dict.merge(res, %{ result: response[:body], error: :null          , code: response[:code]}))
+                    reply(state, 200, %{ result: response[:body], error: :null          , code: response[:code]})
                 false ->
-                    reply(state, 200, Dict.merge(res, %{ result: :null,           error: response[:body], code: response[:code]}))
+                    reply(state, 200, %{ result: :null,           error: response[:body], code: response[:code]})
             end
         end
 
 
         def process(:out, state = %{request: %{ args: args }, response: response}, _opts) do
-            res = Enum.filter(args, fn({"__" <> _, _})-> true; (_)-> false end) |> Enum.into(%{})
 
             case response[:code] < 300 do
                 true -> 
-                    reply(state, response[:code], Dict.merge(res, %{ result: response[:body], error: :null}))
+                    reply(state, response[:code], %{ result: response[:body], error: :null})
                 false ->
-                    reply(state, response[:code], Dict.merge(res, %{ result: :null,           error: response[:body]}))
+                    reply(state, response[:code], %{ result: :null,           error: response[:body]})
             end
         end
     end
