@@ -111,9 +111,9 @@ defmodule Onion.Common do
 
         def process(:in, state = %{ request: request }, opts) do
             args = (request[:args] || %{})
-                    |> Dict.merge(request[:bindings])
                     |> Dict.merge(request[:qs_vals])
                     |> Dict.merge(request[:post])
+                    |> Dict.merge(request[:bindings])
 
             case Onion.Common.DataValidator.validate(args, opts[:args] || [], opts[:optional] || [], opts[:strict]) do
                 {:ok, args} -> 
