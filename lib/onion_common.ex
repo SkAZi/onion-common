@@ -129,9 +129,9 @@ defmodule Onion.Common do
     end
 
 
-    defmiddleware DumbFlashResponse, chain_type: :only, required: [ValidateArgs] do
-        def process(:out, state = %{request: %{ args: args }, response: response}, _opts) do
-            res = Enum.filter(args, fn({"__" <> _, _})-> true; (_)-> false end) |> Enum.into(%{})
+    defmiddleware DumbFlashResponse, chain_type: :only, required: [] do
+        def process(:out, state = %{request: request, response: response}, _opts) do
+            res = Enum.filter(request[:args] || [], fn({"__" <> _, _})-> true; (_)-> false end) |> Enum.into(%{})
 
             case response[:code] < 300 do
                 true -> 
