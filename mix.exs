@@ -9,7 +9,7 @@ defmodule OnionCommon.Mixfile do
   end
 
   def application do
-    [applications: [:logger, :onion]]
+    [applications: [:onion]]
   end
 
   defp deps do

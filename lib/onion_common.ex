@@ -142,6 +142,30 @@ defmodule Onion.Common do
         end
     end
 
+    defmiddleware Response, chain_type: :only do
+        
+        def process(:out, state = %{request: %{ args: args }, response: response}, :hide_status_code) do
+
+            case response[:code] < 300 do
+                true -> 
+                    reply(state, 200, %{ result: response[:body], error: :null          , code: response[:code]})
+                false ->
+                    reply(state, 200, %{ result: :null,           error: response[:body], code: response[:code]})
+            end
+        end
+
+
+        def process(:out, state = %{request: %{ args: args }, response: response}, _opts) do
+
+            case response[:code] < 300 do
+                true -> 
+                    reply(state, response[:code], %{ result: response[:body], error: :null})
+                false ->
+                    reply(state, response[:code], %{ result: :null,           error: response[:body]})
+            end
+        end
+    end
+
 
     defmiddleware Session, chain_type: :only, required: [] do
 
