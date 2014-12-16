@@ -121,7 +121,7 @@ defmodule Onion.Common do
 
                 {:error, error} -> 
                     put_in(state, [:request, :args], %{})
-                    |> reply(400, "Bad request #{inspect error}")
+                    |> reply(400, "Bad request invalid arguments: #{:jiffy.encode(error, [:use_nil])}")
                     |> break
             end  
         end
