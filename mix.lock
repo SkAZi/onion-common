@@ -1,9 +1,7 @@
-%{"cowboy": {:git, "git://github.com/extend/cowboy.git", "fd37fad592fc96a384bcd060696194f5fe074f6f", []},
-  "cowlib": {:git, "git://github.com/ninenines/cowlib.git", "d544a494af4dbc810fc9c15eaf5cc050cced1501", [ref: "1.0.0"]},
+%{"cowboy": {:git, "https://github.com/extend/cowboy", "fd37fad592fc96a384bcd060696194f5fe074f6f", [tag: "fd37fad592fc96a384bcd060696194f5fe074f6f"]},
+  "cowlib": {:git, "https://github.com/ninenines/cowlib", "d544a494af4dbc810fc9c15eaf5cc050cced1501", [tag: "d544a494af4dbc810fc9c15eaf5cc050cced1501"]},
   "hexagon": {:git, "git://github.com/veryevilzed/hex.git", "d1afa9c9f37f85d32e6d2d8bf327fc8a15a12f42", []},
-  "jiffy": {:git, "git://github.com/SkAZi/jiffy.git", "0bb3a1ba01728e2f45f6cdb18539b69169b11e0c", []},
-  "onion": {:git, "git://github.com/veryevilzed/onion.git", "b6176b935ce4aaf59abe8f71f9646ac11f1a5e51", []},
+  "jiffy": {:git, "https://github.com/SkAZi/jiffy", "6cb892d13290f8b748b356ab68888db86039010a", []},
+  "onion": {:git, "https://github.com/veryevilzed/onion", "de48932e952f4d079a29ec4d5ad63343548b3a88", []},
   "quickrand": {:git, "https://github.com/okeuday/quickrand.git", "0395a10b94472ccbe38b62bbfa9d0fc1ddac1dd7", [tag: "v1.3.2"]},
-  "ranch": {:git, "git://github.com/ninenines/ranch.git", "adf1822defc2b7cfdc7aca112adabfa1d614043c", [ref: "1.0.0"]},
-  "underscorex": {:git, "git://github.com/veryevilzed/underscorex.git", "ee24843b0015356115d6d5622fac07cdffe882b0", []},
-  "uuid": {:git, "git://github.com/okeuday/uuid.git", "f7c141c8359cd690faba0d2684b449a07db8e915", []}}
+  "ranch": {:git, "https://github.com/ninenines/ranch", "adf1822defc2b7cfdc7aca112adabfa1d614043c", [tag: "adf1822defc2b7cfdc7aca112adabfa1d614043c"]}}

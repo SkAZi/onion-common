@@ -170,7 +170,7 @@ defmodule Onion.Common do
     defmiddleware Session, chain_type: :only, required: [] do
 
         defp create_session(state) do
-            session = U.uuid
+            session = Onion.Utils.uuid4()
             state 
                 |> put_in([:request, :session], session) 
                 |> set_coockie("session", session)
