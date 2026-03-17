@@ -34,7 +34,7 @@ defmodule Onion.Common.DataValidator do
       cond do
         not String.valid?(value) -> {:error, value}
         not String.printable?(value) -> {:error, value}
-        not Regex.match?(~r{[\n\r\\/'\`\"%&?!<>\(\)\{\}\[\]]}, value) -> {:error, value}
+        Regex.match?(~r{[\n\r\\/'\`\"%&?!<>\(\)\{\}\[\]]}, value) -> {:error, value}
         true -> {:ok, value}
       end
     end
