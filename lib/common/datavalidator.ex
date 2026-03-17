@@ -15,17 +15,17 @@ defmodule Onion.Common.DataValidator do
     defp to_binary(value) when is_float(value), do: {:ok, Float.to_string(value) }
     defp to_binary(value), do: {:error, value}
 
-    defp to_string(value) when is_atom(value), do: {:ok, Atom.to_string(value)}
-    defp to_string(value) when is_integer(value), do: {:ok, Integer.to_string(value)}
-    defp to_string(value) when is_float(value), do: {:ok, Float.to_string(value)}
-    defp to_string(value) when is_binary(value) do
+    defp to_str(value) when is_atom(value), do: {:ok, Atom.to_string(value)}
+    defp to_str(value) when is_integer(value), do: {:ok, Integer.to_string(value)}
+    defp to_str(value) when is_float(value), do: {:ok, Float.to_string(value)}
+    defp to_str(value) when is_binary(value) do
       cond do
         not String.valid?(value) -> {:error, value}
         not String.printable?(value) -> {:error, value}
         true -> {:ok, value}
       end
     end
-    defp to_string(value), do: {:error, value}
+    defp to_str(value), do: {:error, value}
 
     defp to_integer(value) when is_integer(value), do: {:ok, value }
     defp to_integer(value) when is_float(value), do: {:ok, trunc(value) }
@@ -104,7 +104,7 @@ defmodule Onion.Common.DataValidator do
     defp to_string_list(value) when is_list(value) do 
         case (value |> Enum.reduce {:ok, []}, 
             fn(item, {:ok, array}) -> 
-                case to_string(item) do
+                case to_str(item) do
                     {:ok, new_item} -> {:ok, [new_item|array]}
                     {:error, _} -> :error
                 end;
@@ -175,8 +175,8 @@ defmodule Onion.Common.DataValidator do
     defp process(value, :int), do: to_integer(value)
     defp process(value, :binary), do: to_binary(value)
     defp process(value, :bin), do: to_binary(value)
-    defp process(value, :string), do: to_string(value)
-    defp process(value, :str), do: to_string(value)
+    defp process(value, :string), do: to_str(value)
+    defp process(value, :str), do: to_str(value)
     defp process(value, :list), do: to_list(value)
 
     defp process(value, :timestamp_list), do: to_list(value) |> to_int_list
