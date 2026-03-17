@@ -15,6 +15,17 @@ defmodule Onion.Common.DataValidator do
     defp to_binary(value) when is_float(value), do: {:ok, Float.to_string(value) }
     defp to_binary(value), do: {:error, value}
 
+    defp to_string(value) when is_atom(value), do: {:ok, Atom.to_string(value)}
+    defp to_string(value) when is_integer(value), do: {:ok, Integer.to_string(value)}
+    defp to_string(value) when is_float(value), do: {:ok, Float.to_string(value)}
+    defp to_string(value) when is_binary(value) do
+      cond do
+        not String.valid?(value) -> {:error, value}
+        not String.printable?(value) -> {:error, value}
+        true -> {:ok, value}
+      end
+    end
+    defp to_string(value), do: {:error, value}
 
     defp to_integer(value) when is_integer(value), do: {:ok, value }
     defp to_integer(value) when is_float(value), do: {:ok, trunc(value) }
@@ -88,6 +99,22 @@ defmodule Onion.Common.DataValidator do
         end
     end
     
+    defp to_string_list(a={:error, _}), do: a
+    defp to_string_list({:ok, val}), do: to_string_list(val)
+    defp to_string_list(value) when is_list(value) do 
+        case (value |> Enum.reduce {:ok, []}, 
+            fn(item, {:ok, array}) -> 
+                case to_string(item) do
+                    {:ok, new_item} -> {:ok, [new_item|array]}
+                    {:error, _} -> :error
+                end;
+            (_, :error) -> :error
+            end) do
+            :error -> {:error, value}
+            {:ok, val} -> {:ok, Enum.reverse(val) }
+        end
+    end
+
     defp to_atom_list(a={:error, _}), do: a
     defp to_atom_list({:ok, val}), do: to_atom_list(val)
     defp to_atom_list(value) when is_list(value) do 
@@ -148,8 +175,8 @@ defmodule Onion.Common.DataValidator do
     defp process(value, :int), do: to_integer(value)
     defp process(value, :binary), do: to_binary(value)
     defp process(value, :bin), do: to_binary(value)
-    defp process(value, :string), do: to_binary(value)
-    defp process(value, :str), do: to_binary(value)
+    defp process(value, :string), do: to_string(value)
+    defp process(value, :str), do: to_string(value)
     defp process(value, :list), do: to_list(value)
 
     defp process(value, :timestamp_list), do: to_list(value) |> to_int_list
@@ -157,8 +184,8 @@ defmodule Onion.Common.DataValidator do
     defp process(value, :int_list), do: to_list(value) |> to_int_list
     defp process(value, :float_list), do: to_list(value) |> to_float_list
     defp process(value, :bin_list), do: to_list(value) |> to_bin_list
-    defp process(value, :str_list), do: to_list(value) |> to_bin_list
-    defp process(value, :string_list), do: to_list(value) |> to_bin_list
+    defp process(value, :str_list), do: to_list(value) |> to_string_list
+    defp process(value, :string_list), do: to_list(value) |> to_string_list
     defp process(value, :binary_list), do: to_list(value) |> to_bin_list
     defp process(value, :atom_list), do: to_list(value) |> to_atom_list
     defp process(value, :exatom_list), do: to_list(value) |> to_existing_atom_list
