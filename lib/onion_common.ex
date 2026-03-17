@@ -46,9 +46,14 @@ defmodule Onion.Common do
         defp process_json(""), do: %{}
         defp process_json(nil), do: %{}
         defp process_json(body) do
-            case :jiffy.decode(body, [:return_maps, :use_nil]) do
-                {:error, _} -> %{} 
-                res -> res |> key_to_bin_dict
+            cond do
+                not String.valid?(body) -> %{}
+                not String.printable?(body) -> %{}
+                true ->
+                    case :jiffy.decode(body, [:return_maps, :use_nil]) do
+                        {:error, _} -> %{} 
+                        res -> res |> key_to_bin_dict
+                    end
             end
         end
 
