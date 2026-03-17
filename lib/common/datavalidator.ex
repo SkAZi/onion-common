@@ -218,8 +218,8 @@ defmodule Onion.Common.DataValidator do
     defp process(value, :str_list), do: to_list(value) |> to_string_list
     defp process(value, :string_list), do: to_list(value) |> to_string_list
     defp process(value, :binary_list), do: to_list(value) |> to_bin_list
-    defp process(value, :safestr_list), do: to_list(value) |> to_safestring_list
-    defp process(value, :safestring_list), do: to_list(value) |> to_safestring_list
+    defp process(value, :safestr_list), do: to_list(value) |> to_safestr_list
+    defp process(value, :safestring_list), do: to_list(value) |> to_safestr_list
     defp process(value, :atom_list), do: to_list(value) |> to_atom_list
     defp process(value, :exatom_list), do: to_list(value) |> to_existing_atom_list
     defp process(value, :existing_atom_list), do: to_list(value) |> to_existing_atom_list
