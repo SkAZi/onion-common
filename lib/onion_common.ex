@@ -121,7 +121,7 @@ defmodule Onion.Common do
 
                 {:error, error} -> 
                     put_in(state, [:request, :args], %{})
-                    |> reply(400, "Bad request invalid arguments: #{:jiffy.encode(error, [:use_nil])}")
+                    |> reply(400, "Bad request invalid arguments")
                     |> break
             end  
         end
@@ -144,7 +144,7 @@ defmodule Onion.Common do
 
     defmiddleware Response, chain_type: :only do
         
-        def process(:out, state = %{request: %{ args: args }, response: response}, :hide_status_code) do
+        def process(:out, state = %{response: response}, :hide_status_code) do
 
             case response[:code] < 300 do
                 true -> 
@@ -155,7 +155,7 @@ defmodule Onion.Common do
         end
 
 
-        def process(:out, state = %{request: %{ args: args }, response: response}, _opts) do
+        def process(:out, state = %{response: response}, _opts) do
 
             case response[:code] < 300 do
                 true -> 
